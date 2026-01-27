@@ -1,0 +1,11 @@
+services:
+  db:
+    image: postgres
+    restart: always
+    volumes: 
+      - /home/suponer/Documents/SystemManager/backend/postgres/:/var/lib/postgresql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=docker
+    ports:
+      - 5432:5432 
