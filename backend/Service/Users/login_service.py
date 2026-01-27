@@ -10,7 +10,8 @@ def login(DBInstance, content: dict):
         user = DBInstance.cursor.fetchone()
         if user is not None:
             if password_check(content["password"], user[2]):
-                return make_response({"status": 200, "description": "YAYY"}, 200)
+                print(user)
+                return make_response({"status": 200, "description": "YAYY", "username":user[1], "role": user[3]}, 200)
             else:
                 return make_response(
                     {"status": 401, "description": "Wrong password brutha"}, 401
@@ -21,4 +22,4 @@ def login(DBInstance, content: dict):
             )
     except Exception as e:
         print("ERROR LOGIN:", e)
-        return make_response({"status": 500, "description": "Error occured: " + str(e)})
+        return make_response({"status": 500, "description": "Error occured: " + str(e)}, 500)

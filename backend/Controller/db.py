@@ -1,6 +1,9 @@
 from flask import make_response
 import psycopg
 
+import os
+from dotenv import load_dotenv
+
 from Service.Users.login_service import login
 from Service.Users.register_service import register
 from enums.roles import checkRole
@@ -8,8 +11,14 @@ from enums.roles import checkRole
 
 class DBInstance:
     def __init__(self):
+        load_dotenv()
+        DB_HOST = os.getenv("DB_HOST")
+        DB_PORT = os.getenv("DB_PORT")
+        DB_USER = os.getenv("DB_USER")
+        DB_PASSWORD = os.getenv("DB_PASSWORD")
+
         self.conn = psycopg.connect(
-            "host=localhost port=5432 user=postgres password=docker"
+            f"host={DB_HOST} port={DB_PORT} user={DB_USER} password={DB_PASSWORD}"
         )
         self.cursor = self.conn.cursor()
         print("DB connection created")
