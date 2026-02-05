@@ -1,17 +1,19 @@
-from flask import Flask, abort, make_response
+from flask import Blueprint, Flask, abort, make_response
 from flask import request
 from Controller.db import DBInstance
-from Service.Machine import check_online
+from Service.Machine import check_online, wake_machine
 
 app = Flask(__name__)
 
-@app.route("/")
+# Blueprint for API calls
+api = Blueprint('api', __name__)
+@api.route("/")
 def index():
     res = {"status": 200, "HEALTH": "OK"}
     return res, 200
 
 
-@app.route("/get_all", methods=["GET"])
+@api.route("/get_all", methods=["GET"])
 def getAll():
     if request.method == "GET":
         db = DBInstance()
@@ -22,7 +24,7 @@ def getAll():
     abort(404)
 
 
-@app.route("/register", methods=["POST"])
+@api.route("/register", methods=["POST"])
 def register():
     db = DBInstance()
     if request.method == "POST":
@@ -31,7 +33,7 @@ def register():
     abort(404)
 
 
-@app.route("/login", methods=["POST"])
+@api.route("/login", methods=["POST"])
 def login():
     db = DBInstance()
     try:
@@ -41,10 +43,15 @@ def login():
         res = make_response({"status": 400, "description": f"{e}"}, 400)
         return res
 
-@app.route("/get_status")
+@api.route("/get_status")
 def get_status():
     print(request.args.get('ip'))
-    machine_status = check_online.check_online(ip_addr=request.args.get('ip'))
+    machine_status = check_online.check_online(ip_addr=request.args.get('ip_addr'))
+    return make_response({"status": 200, "data": machine_status.value})
+
+@api.route("/wake_pc", methods=["POST"])
+def wake_pc():
+    machine_status = wake_machine.wake_machine(mac_addr=request.args.get('mac_addr'))
     return make_response({"status": 200, "data": machine_status.value})
 
 @app.errorhandler(404)
@@ -56,6 +63,8 @@ def not_found(error):
 def server_error(error):
     res = make_response({"status": 500, "description": f"{error}"}, 500)
     return res
+
+app.register_blueprint(api, url_prefix='/api/v1')
 
 def start_app():
     return app
